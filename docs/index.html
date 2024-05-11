@@ -72,6 +72,7 @@ Cesium.Camera.DEFAULT_VIEW_FACTOR = 0;
 // https://github.com/Project-PLATEAU/plateau-streaming-tutorial
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5N2UyMjcwOS00MDY1LTQxYjEtYjZjMy00YTU0ZTg5MmViYWQiLCJpZCI6ODAzMDYsImlhdCI6MTY0Mjc0ODI2MX0.dkwAL1CcljUV7NA7fDbhXXnmyZQU_c-G5zRx8PtEcxE";
 
+// Terrainの指定（EGM96、国土数値情報5m標高から生成した全国の地形モデル、5m標高データが無い場所は10m標高で補完している）
 const terrainViewModels = Cesium.createDefaultTerrainProviderViewModels();
 terrainViewModels.push(new Cesium.ProviderViewModel({
   name: 'PLATEAU-Terrain',
@@ -82,12 +83,6 @@ terrainViewModels.push(new Cesium.ProviderViewModel({
     return Cesium.CesiumTerrainProvider.fromIonAssetId(770371);
   }
 }));
-// Terrainの指定（EGM96、国土数値情報5m標高から生成した全国の地形モデル、5m標高データが無い場所は10m標高で補完している）
-/*
-Cesium.CesiumTerrainProvider.fromIonAssetId(770371).then(terrainProvider => {
-  viewer.terrainProvider = terrainProvider;
-}).catch(console.error);
-*/
 const imageryViewModels = Cesium.createDefaultImageryProviderViewModels();
 imageryViewModels.push(new Cesium.ProviderViewModel({
   name: 'GSI photo',
@@ -126,12 +121,14 @@ var viewer = new Cesium.Viewer("cesiumContainer", {
 });
 
 const urlParams = new URLSearchParams(document.location.search);
-if (urlParams.has('google3dtile')) {
-  Cesium.createGooglePhotorealistic3DTileset().then(tileset => {
-    viewer.scene.primitives.add(tileset);
+const tileset = urlParams.get('tileset');
+if (tileset === 'none') {
+} else if (tileset === 'google3dtile') {
+  Cesium.createGooglePhotorealistic3DTileset().then(t => {
+    viewer.scene.primitives.add(t);
   }).catch(console.error);
 } else {
-  let tileseturls = urlParams.getAll('tileseturl');
+  let tileseturls = urlParams.getAll('tileset');
   if (tileseturls.length === 0) {
     // 東京都千代田区の建物データ（3D Tiles）
     tileseturls = ['https://assets.cms.plateau.reearth.io/assets/aa/ecf312-95c2-4e24-8351-642f27e447b6/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13101_chiyoda-ku_lod1/tileset.json'];
@@ -142,7 +139,7 @@ if (urlParams.has('google3dtile')) {
       luminanceAtZenith: 0.5,
     }))
   ).then(tilesets => {
-    tilesets.forEach(tileset => bldg3dtiles.add(tileset));
+    tilesets.forEach(t => bldg3dtiles.add(t));
     viewer.scene.primitives.add(bldg3dtiles);
     //viewer.flyTo(tilesets[0]);
   }).catch(console.error);
@@ -223,7 +220,7 @@ function loadCzml(czml) {
 
 var HEIGHT_DEFAULT = 39.5; // height from ellipsoid
 // height from terrain in [m] for heightReference == 'relative_const'
-var HEIGHT_OFFSET = +urlParams.get('height') || 2;
+var HEIGHT_OFFSET = urlParams.has('height') ? +urlParams.get('height') : 2;
 
 function onClockTick(clock) {
   if (!targetEntity) {
@@ -258,17 +255,13 @@ function onClockTick(clock) {
 }
 
 // 曲がる前から少しずつ視点方向を変える
-//var CORNERING_START = 2; // [m] 角の前の何mで、曲がり始めるか
-var CORNERING_START = 2; // [sec] 角の前の何secで、曲がり始めるか
+var CORNERING_START = 2; // [sec] 角の何sec前から、曲がり始めるか
 function initSlerp(czml1, entity) {
   const times = [];
   for (let i = 0; i < czml1.position.cartographicDegrees.length; i += 4) {
     times.push(czml1.position.cartographicDegrees[i]);
   }
-  //const speed = czml1._totalkm / times[times.length - 1]; // [km/s]
-  //const corneringStartDiffSec = CORNERING_START / 1000 / speed;
   const corneringStartDiffSec = CORNERING_START;
-  //const entity = viewer.selectedEntity;
   const vop = new Cesium.VelocityOrientationProperty(entity.position);
   const epoch = Cesium.JulianDate.fromIso8601(czml1.position.epoch);
   const points = [];
@@ -282,17 +275,15 @@ function initSlerp(czml1, entity) {
     if (!result) {
       result = new Cesium.Quaternion();
     }
-    //const quaternion = vop.getValue(time, result);
     const seconds = Cesium.JulianDate.secondsDifference(time, epoch);
     //return qspline.evaluate(seconds, result);
     const idx = qspline.findTimeInterval(seconds);
     if (idx + 1 >= points.length) {
       return points[idx].clone(result);
     }
-    // 曲がり角の直前の距離CORNERING_START[m]から曲がり始めるようにする
+    // 曲がり角の直前CORNERING_START[s]から曲がり始めるようにする
     let rotateStartSeconds = times[idx + 1] - corneringStartDiffSec;
     if (rotateStartSeconds <= times[idx]) { // CORNERING_START以下の短い道
-      //rotateStartSeconds = times[idx] + (times[idx + 1] - times[idx]) * 0.9;
       rotateStartSeconds = times[idx];
     }
     if (seconds < rotateStartSeconds) {
