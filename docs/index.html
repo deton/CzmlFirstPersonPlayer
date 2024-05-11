@@ -183,6 +183,7 @@ if (MINIMAPZOOM < 0) {
   }).addTo(minimap);
 }
 
+let heightReference = 'relative_const';
 let targetEntity;
 const czmlDataSource = new Cesium.CzmlDataSource();
 let minimapLine;
@@ -198,7 +199,13 @@ function loadCzml(czml) {
   return czmlDataSource.load(czml).then(dataSource => {
     viewer.dataSources.add(czmlDataSource);
     targetEntity = czmlDataSource.entities.getById(czml[1].id);
-    //targetEntity.model.heightReference = Cesium.HeightReference.RELATIVE_TO_GROUND; // XXX: not work?
+    if (czml[1].model?.heightReference?.startsWith('RELATIVE')) {
+      heightReference = 'relative_czml';
+    } else if (czml[1].model?.heightReference?.startsWith('CLAMP')) {
+      heightReference = 'relative_const';
+    } else { // 'NONE'
+      heightReference = 'absolute';
+    }
 
     if (MINIMAPZOOM > 0) {
       viewer.camera.changed.addEventListener(syncMinimap);
@@ -215,8 +222,8 @@ function loadCzml(czml) {
 }
 
 var HEIGHT_DEFAULT = 39.5; // height from ellipsoid
-// height from terrain in [m]
-var HEIGHT_OFFSET = urlParams.has('height') ? +urlParams.get('height') : 2;
+// height from terrain in [m] for heightReference == 'relative_const'
+var HEIGHT_OFFSET = +urlParams.get('height') || 2;
 
 function onClockTick(clock) {
   if (!targetEntity) {
@@ -226,30 +233,28 @@ function onClockTick(clock) {
   if (!position) {
     return;
   }
-  if (HEIGHT_OFFSET != 0) {
+  if (heightReference !== 'absolute') {
     const globe = viewer.scene.globe;
     const ellipsoid = globe.ellipsoid;
     const cartographic = ellipsoid.cartesianToCartographic(position);
     const height = globe.getHeight(cartographic);
     if (height < 0) {
-      console.log('negative height. terrain may not loaded yet', height);
+      console.warn('negative height. terrain may not loaded yet', height);
+      height = HEIGHT_DEFAULT;
     }
-    cartographic.height = (height <= 0 ? HEIGHT_DEFAULT : height) + HEIGHT_OFFSET;
+    if (heightReference === 'relative_const') {
+      cartographic.height = height + HEIGHT_OFFSET;
+    } else if (heightReference === 'relative_czml') {
+      cartographic.height += height;
+    }
     position = ellipsoid.cartographicToCartesian(cartographic);
   }
 
   // https://community.cesium.com/t/what-should-i-do-if-the-camera-is-locked-when-using-lookattransform/14825/4
   const orientation = Cesium.Property.getValueOrUndefined(targetEntity.orientation, clock.currentTime);
-  let matrix4;
-  if (!Cesium.defined(orientation)) {
-    //matrix4 = Cesium.Transforms.eastNorthUpToFixedFrame(position);
-    console.log('no orientation');
-    return;
-  } else {
-    matrix4 = Cesium.Matrix4.fromRotationTranslation(
-      Cesium.Matrix3.fromQuaternion(orientation), position);
-  }
-  viewer.camera.lookAtTransform(matrix4, new Cesium.Cartesian3(-1, 0, 0));
+  const transform = Cesium.Matrix4.fromRotationTranslation(
+    Cesium.Matrix3.fromQuaternion(orientation), position);
+  viewer.camera.lookAtTransform(transform, new Cesium.Cartesian3(-1, 0, 0));
 }
 
 // 曲がる前から少しずつ視点方向を変える
