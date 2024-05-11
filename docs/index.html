@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>CZML First Person Player</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet"></head>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+</head>
+<style>
+  #cesiumContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+    font-family: sans-serif;
+  }
+  #loadingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0.9;
+    width: 100%;
+    height: 100%;
+    display: none;
+  }
+  #loadingOverlay h1 {
+    text-align: center;
+    position: relative;
+    top: 50%;
+  }
+  #toolbar {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+  }
+  #minimap {
+    z-index: 1;
+    position: absolute;
+    bottom: 30px;
+    right: 5px;
+    width: 20%;
+    height: 30%;
+  }
+  #minimapToggleButton {
+    z-index: 2;
+    position: absolute;
+    bottom: 32px;
+    right: 10px;
+  }
+  html {
+    height: 100%;
+  }
+  body {
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    height: 100%;
+  }
+</style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  <div id="loadingOverlay"><h1>Loading...</h1></div>
+  <div id="toolbar">
+    <label>Load CZML:
+      <input type="file" id="fileElem" accept=".czml" />
+    </label>
+  </div>
+  <div id="minimap"></div>
+  <button id="minimapToggleButton">&#x1f441;</button>
+  <script>
+'use strict';
+Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(139.7688, 35.6970, 139.7761, 35.7031);
+Cesium.Camera.DEFAULT_VIEW_FACTOR = 0;
+
+// Cesium ionの読み込み指定
+// https://github.com/Project-PLATEAU/plateau-streaming-tutorial
+Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5N2UyMjcwOS00MDY1LTQxYjEtYjZjMy00YTU0ZTg5MmViYWQiLCJpZCI6ODAzMDYsImlhdCI6MTY0Mjc0ODI2MX0.dkwAL1CcljUV7NA7fDbhXXnmyZQU_c-G5zRx8PtEcxE";
+
+const terrainViewModels = Cesium.createDefaultTerrainProviderViewModels();
+terrainViewModels.push(new Cesium.ProviderViewModel({
+  name: 'PLATEAU-Terrain',
+  tooltip: 'PLATEAU-Terrain',
+  iconUrl: 'https://plateauview.mlit.go.jp/favicon.ico',
+  category: 'Cesium ion',
+  creationFunction: function () {
+    return Cesium.CesiumTerrainProvider.fromIonAssetId(770371);
+  }
+}));
+// Terrainの指定（EGM96、国土数値情報5m標高から生成した全国の地形モデル、5m標高データが無い場所は10m標高で補完している）
+/*
+Cesium.CesiumTerrainProvider.fromIonAssetId(770371).then(terrainProvider => {
+  viewer.terrainProvider = terrainProvider;
+}).catch(console.error);
+*/
+const imageryViewModels = Cesium.createDefaultImageryProviderViewModels();
+imageryViewModels.push(new Cesium.ProviderViewModel({
+  name: 'GSI photo',
+  tooltip: 'seamlessphoto of GSI(Geospatial Information Authority of Japan)',
+  iconUrl: 'https://cyberjapandata.gsi.go.jp/favicon.ico',
+  category: 'Other',
+  creationFunction: function () {
+    return new Cesium.UrlTemplateImageryProvider({
+      url: 'https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg',
+      credit: new Cesium.Credit(
+        '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>'
+      ),
+      minimumLevel: 2,
+      maximumLevel: 18,
+    });
+  }
+}));
+imageryViewModels.push(new Cesium.ProviderViewModel({
+  // G空間情報センターに置かれている、Project PLATEAUで作成したPLATEAUオルソ
+  name: 'PLATEAU Ortho',
+  tooltip: 'PLATEAU Ortho by Project PLATEAU',
+  iconUrl: 'https://plateauview.mlit.go.jp/favicon.ico',
+  category: 'Other',
+  creationFunction: function () {
+    return new Cesium.UrlTemplateImageryProvider({
+      url: 'https://gic-plateau.s3.ap-northeast-1.amazonaws.com/2020/ortho/tiles/{z}/{x}/{y}.png',
+      maximumLevel: 19
+    });
+  }
+}));
+var viewer = new Cesium.Viewer("cesiumContainer", {
+  terrainProviderViewModels: terrainViewModels,
+  imageryProviderViewModels: imageryViewModels,
+  selectedTerrainProviderViewModel: terrainViewModels.at(-1),
+  geocoder: false,
+});
+
+const urlParams = new URLSearchParams(document.location.search);
+if (urlParams.has('google3dtile')) {
+  Cesium.createGooglePhotorealistic3DTileset().then(tileset => {
+    viewer.scene.primitives.add(tileset);
+  }).catch(console.error);
+} else {
+  let tileseturls = urlParams.getAll('tileseturl');
+  if (tileseturls.length === 0) {
+    // 東京都千代田区の建物データ（3D Tiles）
+    tileseturls = ['https://assets.cms.plateau.reearth.io/assets/aa/ecf312-95c2-4e24-8351-642f27e447b6/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13101_chiyoda-ku_lod1/tileset.json'];
+  }
+  const bldg3dtiles = new Cesium.PrimitiveCollection();
+  Promise.all(
+    tileseturls.map(url => Cesium.Cesium3DTileset.fromUrl(url, {
+      luminanceAtZenith: 0.5,
+    }))
+  ).then(tilesets => {
+    tilesets.forEach(tileset => bldg3dtiles.add(tileset));
+    viewer.scene.primitives.add(bldg3dtiles);
+    //viewer.flyTo(tilesets[0]);
+  }).catch(console.error);
+}
+
+viewer.camera.setView({
+  destination: Cesium.Cartesian3.fromDegrees(139.77398, 35.69403, 1042),
+  orientation: {
+    heading: Cesium.Math.toRadians(355),
+    pitch: Cesium.Math.toRadians(-55),
+    roll: 0
+  }
+});
+
+const czmlurl = urlParams.get('czmlurl');
+if (czmlurl) {
+  fetch(czmlurl).then(resp => resp.json()).then(json => loadCzml(json)).catch(console.error);
+}
+
+// 俯瞰表示minimap用Leaflet
+var MINIMAPZOOM = urlParams.has('minimap') ? +urlParams.get('minimap') : 17;
+if (MINIMAPZOOM < 0) {
+  document.getElementById('minimap').style.display = 'none';
+  document.getElementById('minimapToggleButton').style.display = 'none';
+} else {
+  const osmmap = L.tileLayer('https://tile.openstreetmap.jp/styles/osm-bright/512/{z}/{x}/{y}.png', {
+    attribution: '<a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
+  });
+  var minimap = L.map('minimap', {
+    center: [35.6982119, 139.7725757],
+    zoom: MINIMAPZOOM,
+    layers: [osmmap],
+  });
+  var minimapMarker = L.circleMarker(minimap.getCenter(), {
+    radius: 4,
+    fill: true,
+    fillOpacity: 1.0,
+  }).addTo(minimap);
+}
+
+var HEIGHT_DEFAULT = 39.5;
+
+// pathの高さを地表に合わせる。
+// でないとウォークスルー視点でずれる(動くにつれて線がスライドする)。
+// XXX: 道の途中が低くなっていると、pathの線が頭上に表示される場合あり。
+// XXX: 道の途中が高くなっていると、線が地面の下になって見えなくなる場合あり。
+function updatePathHeightFromTerrain(czml) {
+  const terrainLoadPromise = new Promise((resolve, reject) => {
+    if (viewer.scene.globe.tilesLoaded) {
+      resolve();
+      return;
+    }
+    viewer.scene.globe.tileLoadProgressEvent.addEventListener(queuedTileCount => {
+      if (viewer.scene.globe.tilesLoaded) {
+        resolve();
+      }
+    });
+  });
+
+  return terrainLoadPromise.then(() => {
+    /*
+    // HEIGHT_DEFAULTが(0でない値に)設定されていればそれを使用。
+    // XXX: まじめにheightを取得すると10秒程度かかる場合があるので。
+    if (HEIGHT_DEFAULT) {
+      return czml;
+    }
+    */
+    const globe = viewer.scene.globe;
+    const ellipsoid = globe.ellipsoid;
+    //const poslist = [];
+    czml.slice(1).forEach(x => {
+      if (!x.path.show) {
+        return;
+      }
+      const pos = x.position.cartographicDegrees;
+      if (pos[3] != 0) { // height is already set
+        return;
+      }
+      for (let i = 0; i < pos.length; i += 4) {
+        const cartographic = Cesium.Cartographic.fromDegrees(pos[i + 1], pos[i + 2]);
+        //poslist.push(cartographic);
+        const height = globe.getHeight(cartographic);
+        pos[i + 3] = height;
+        if (height < 0) {
+          console.log('negative height. terrain may not loaded yet', height);
+        }
+      }
+    });
+    return czml;
+/*
+    return Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, poslist);
+  }).then((updatedPositions) => {
+    let upidx = 0;
+    czml.slice(1).forEach(x => {
+      const pos = x.position.cartographicDegrees;
+      for (let i = 0; i < pos.length; i += 4) {
+        pos[i + 3] = updatedPositions[upidx].height;
+        upidx++;
+      }
+    });
+    return czml;
+*/
+  });
+}
+
+var FLYTOWALK_HEIGHTOFFSET = 10;
+var FLYTOWALK_HEADINGOFFSET = 0;
+var flyToMaxHeight = viewer.camera.positionCartographic.height;
+let targetEntity;
+const czmlDataSource = new Cesium.CzmlDataSource();
+let minimapLine;
+function loadCzml(czml) {
+  console.log('Loading CZML...');
+  document.getElementById('loadingOverlay').style.display = 'block';
+  targetEntity = null;
+  viewer.clockViewModel.shouldAnimate = false;
+  viewer.clock.onTick.removeEventListener(onClockTick);
+  viewer.camera.changed.removeEventListener(syncMinimap);
+  if (minimapLine) {
+    minimapLine.removeFrom(minimap);
+  }
+
+  console.time('updatePathHeightFromTerrain');
+  updatePathHeightFromTerrain(czml).then(czml => {
+    console.timeEnd('updatePathHeightFromTerrain');
+    console.log('terrain height czml', czml);
+    return czmlDataSource.load(czml);
+  }).then(dataSource => {
+    viewer.dataSources.add(czmlDataSource);
+    targetEntity = czmlDataSource.entities.getById(czml[1].id);
+
+    if (MINIMAPZOOM > 0) {
+      viewer.camera.changed.addEventListener(syncMinimap);
+      viewer.camera.percentageChanges = 0.1;
+      minimapLine = addczmlline(czml[1]);
+    }
+
+    //viewer.trackedEntity = targetEntity;
+    initSlerp(czml[1], targetEntity);
+
+    document.getElementById('loadingOverlay').style.display = 'none';
+    // flyTo
+    viewer.camera.cancelFlight();
+    viewer.clockViewModel.shouldAnimate = false;
+    const tryFlyTo = new Promise((resolve, reject) => {
+      const time = czmlDataSource.clock.startTime;
+      let position = targetEntity.position.getValue(time);
+      if (!position) {
+        resolve();
+        return;
+      }
+      const globe = viewer.scene.globe;
+      const ellipsoid = globe.ellipsoid;
+      const cartographic = ellipsoid.cartesianToCartographic(position);
+      const height = globe.getHeight(cartographic);
+      cartographic.height = (height <= 0 ? HEIGHT_DEFAULT : height) + FLYTOWALK_HEIGHTOFFSET; // XXX:地下になると地表タイル再ロード
+      position = ellipsoid.cartographicToCartesian(cartographic);
+      const quaternion = targetEntity.orientation.getValue(time) || Cesium.Quaternion.IDENTITY;
+      const hpr = Cesium.HeadingPitchRoll.fromQuaternion(quaternion);
+      viewer.camera.flyTo({
+        destination: position,
+        orientation: {
+          heading: hpr.heading - Cesium.Math.toRadians(FLYTOWALK_HEADINGOFFSET),
+          pitch: 0,
+          roll: 0,
+        },
+        maximumHeight: flyToMaxHeight,
+        complete: resolve,
+      });
+    });
+    return tryFlyTo;
+  }).then(() => {
+    viewer.clock.onTick.addEventListener(onClockTick);
+    viewer.animation.viewModel.playForwardViewModel.command();
+  }).catch(console.error);
+}
+
+// height from terrain in [m]
+var HEIGHT_OFFSET = urlParams.has('height') ? +urlParams.get('height') : 2;
+
+function onClockTick(clock) {
+  if (!targetEntity) {
+    return;
+  }
+  let position = targetEntity.position.getValue(clock.currentTime);
+  if (!position) {
+    return;
+  }
+  if (HEIGHT_OFFSET != 0) {
+    const globe = viewer.scene.globe;
+    const ellipsoid = globe.ellipsoid;
+    const cartographic = ellipsoid.cartesianToCartographic(position);
+    const height = globe.getHeight(cartographic);
+    if (height < 0) {
+      console.log('negative height. terrain may not loaded yet', height);
+    }
+    cartographic.height = (height <= 0 ? HEIGHT_DEFAULT : height) + HEIGHT_OFFSET;
+    position = ellipsoid.cartographicToCartesian(cartographic);
+  }
+
+  // https://community.cesium.com/t/what-should-i-do-if-the-camera-is-locked-when-using-lookattransform/14825/4
+  const orientation = Cesium.Property.getValueOrUndefined(targetEntity.orientation, clock.currentTime);
+  let matrix4;
+  if (!Cesium.defined(orientation)) {
+    //matrix4 = Cesium.Transforms.eastNorthUpToFixedFrame(position);
+    console.log('no orientation');
+    return;
+  } else {
+    matrix4 = Cesium.Matrix4.fromRotationTranslation(
+      Cesium.Matrix3.fromQuaternion(orientation), position);
+  }
+  viewer.camera.lookAtTransform(matrix4, new Cesium.Cartesian3(-1, 0, 0));
+}
+
+// 曲がる前から少しずつ視点方向を変える
+//var CORNERING_START = 2; // [m] 角の前の何mで、曲がり始めるか
+var CORNERING_START = 2; // [sec] 角の前の何secで、曲がり始めるか
+function initSlerp(czml1, entity) {
+  const times = [];
+  for (let i = 0; i < czml1.position.cartographicDegrees.length; i += 4) {
+    times.push(czml1.position.cartographicDegrees[i]);
+  }
+  //const speed = czml1._totalkm / times[times.length - 1]; // [km/s]
+  //const corneringStartDiffSec = CORNERING_START / 1000 / speed;
+  const corneringStartDiffSec = CORNERING_START;
+  //const entity = viewer.selectedEntity;
+  const vop = new Cesium.VelocityOrientationProperty(entity.position);
+  const epoch = Cesium.JulianDate.fromIso8601(czml1.position.epoch);
+  const points = [];
+  for (let i = 0; i < times.length; i++) {
+    const t = Cesium.JulianDate.addSeconds(epoch, times[i], new Cesium.JulianDate());
+    const q = vop.getValue(t, new Cesium.Quaternion());
+    points.push(q);
+  }
+  const qspline = new Cesium.QuaternionSpline({times, points});
+  entity.orientation = new Cesium.CallbackProperty((time, result) => {
+    if (!result) {
+      result = new Cesium.Quaternion();
+    }
+    //const quaternion = vop.getValue(time, result);
+    const seconds = Cesium.JulianDate.secondsDifference(time, epoch);
+    //return qspline.evaluate(seconds, result);
+    const idx = qspline.findTimeInterval(seconds);
+    if (idx + 1 >= points.length) {
+      return points[idx].clone(result);
+    }
+    // 曲がり角の直前の距離CORNERING_START[m]から曲がり始めるようにする
+    let rotateStartSeconds = times[idx + 1] - corneringStartDiffSec;
+    if (rotateStartSeconds <= times[idx]) { // CORNERING_START以下の短い道
+      //rotateStartSeconds = times[idx] + (times[idx + 1] - times[idx]) * 0.9;
+      rotateStartSeconds = times[idx];
+    }
+    if (seconds < rotateStartSeconds) {
+      return points[idx].clone(result);
+    }
+    // times[idx] < rotateStartSeconds <= seconds < times[idx+1] (in seconds from epoch)
+    const t = (seconds - rotateStartSeconds) / (times[idx + 1] - rotateStartSeconds);
+    return Cesium.Quaternion.fastSlerp(points[idx], points[idx + 1], t, result);
+    //return Cesium.Quaternion.lerp(points[idx], points[idx + 1], t, result); // XXX: 短い道をはさんで多段で曲がる際に2つめが逆回転になる場合あり
+  }, false);
+}
+
+function addczmlline(czml1) {
+  const posdata = czml1.position.cartographicDegrees;
+  const latlngs = [];
+  for (let i = 0; i < posdata.length; i += 4) {
+    latlngs.push([posdata[i + 2], posdata[i + 1]]);
+  }
+  return L.polyline(latlngs).addTo(minimap);
+}
+
+function syncMinimap() {
+  const pos = viewer.scene.camera.positionCartographic;
+  minimap.setView([
+    Cesium.Math.toDegrees(pos.latitude),
+    Cesium.Math.toDegrees(pos.longitude)
+  ], MINIMAPZOOM);
+  minimapMarker.setLatLng(minimap.getCenter());
+}
+
+const fileInput = document.getElementById("fileElem");
+fileElem.addEventListener("change", () => {
+  const [file] = fileElem.files;
+  if (file) {
+    file.text().then(text => {
+      loadCzml(JSON.parse(text));
+    }).catch(console.error);
+  }
+  //fileElem.value = '';
+});
+
+const minimapToggleButton = document.getElementById('minimapToggleButton');
+minimapToggleButton.addEventListener('click', () => {
+  const minimapElem = document.getElementById('minimap');
+  if (minimapElem.style.display == 'none') {
+    minimapElem.style.display = 'block';
+  } else {
+    minimapElem.style.display = 'none';
+  }
+});
+  </script>
+</body>
+</html>
