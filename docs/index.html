@@ -24,20 +24,6 @@
     padding: 0;
     font-family: sans-serif;
   }
-  #loadingOverlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0.9;
-    width: 100%;
-    height: 100%;
-    display: none;
-  }
-  #loadingOverlay h1 {
-    text-align: center;
-    position: relative;
-    top: 50%;
-  }
   #toolbar {
     position: absolute;
     top: 5px;
@@ -70,7 +56,6 @@
 </head>
 <body>
   <div id="cesiumContainer"></div>
-  <div id="loadingOverlay"><h1>Loading...</h1></div>
   <div id="toolbar">
     <label>Load CZML:
       <input type="file" id="fileElem" accept=".czml" />
@@ -198,80 +183,10 @@ if (MINIMAPZOOM < 0) {
   }).addTo(minimap);
 }
 
-var HEIGHT_DEFAULT = 39.5;
-
-// pathの高さを地表に合わせる。
-// でないとウォークスルー視点でずれる(動くにつれて線がスライドする)。
-// XXX: 道の途中が低くなっていると、pathの線が頭上に表示される場合あり。
-// XXX: 道の途中が高くなっていると、線が地面の下になって見えなくなる場合あり。
-function updatePathHeightFromTerrain(czml) {
-  const terrainLoadPromise = new Promise((resolve, reject) => {
-    if (viewer.scene.globe.tilesLoaded) {
-      resolve();
-      return;
-    }
-    viewer.scene.globe.tileLoadProgressEvent.addEventListener(queuedTileCount => {
-      if (viewer.scene.globe.tilesLoaded) {
-        resolve();
-      }
-    });
-  });
-
-  return terrainLoadPromise.then(() => {
-    /*
-    // HEIGHT_DEFAULTが(0でない値に)設定されていればそれを使用。
-    // XXX: まじめにheightを取得すると10秒程度かかる場合があるので。
-    if (HEIGHT_DEFAULT) {
-      return czml;
-    }
-    */
-    const globe = viewer.scene.globe;
-    const ellipsoid = globe.ellipsoid;
-    //const poslist = [];
-    czml.slice(1).forEach(x => {
-      if (!x.path.show) {
-        return;
-      }
-      const pos = x.position.cartographicDegrees;
-      if (pos[3] != 0) { // height is already set
-        return;
-      }
-      for (let i = 0; i < pos.length; i += 4) {
-        const cartographic = Cesium.Cartographic.fromDegrees(pos[i + 1], pos[i + 2]);
-        //poslist.push(cartographic);
-        const height = globe.getHeight(cartographic);
-        pos[i + 3] = height;
-        if (height < 0) {
-          console.log('negative height. terrain may not loaded yet', height);
-        }
-      }
-    });
-    return czml;
-/*
-    return Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, poslist);
-  }).then((updatedPositions) => {
-    let upidx = 0;
-    czml.slice(1).forEach(x => {
-      const pos = x.position.cartographicDegrees;
-      for (let i = 0; i < pos.length; i += 4) {
-        pos[i + 3] = updatedPositions[upidx].height;
-        upidx++;
-      }
-    });
-    return czml;
-*/
-  });
-}
-
-var FLYTOWALK_HEIGHTOFFSET = 10;
-var FLYTOWALK_HEADINGOFFSET = 0;
-var flyToMaxHeight = viewer.camera.positionCartographic.height;
 let targetEntity;
 const czmlDataSource = new Cesium.CzmlDataSource();
 let minimapLine;
 function loadCzml(czml) {
-  console.log('Loading CZML...');
-  document.getElementById('loadingOverlay').style.display = 'block';
   targetEntity = null;
   viewer.clockViewModel.shouldAnimate = false;
   viewer.clock.onTick.removeEventListener(onClockTick);
@@ -280,14 +195,10 @@ function loadCzml(czml) {
     minimapLine.removeFrom(minimap);
   }
 
-  console.time('updatePathHeightFromTerrain');
-  updatePathHeightFromTerrain(czml).then(czml => {
-    console.timeEnd('updatePathHeightFromTerrain');
-    console.log('terrain height czml', czml);
-    return czmlDataSource.load(czml);
-  }).then(dataSource => {
+  return czmlDataSource.load(czml).then(dataSource => {
     viewer.dataSources.add(czmlDataSource);
     targetEntity = czmlDataSource.entities.getById(czml[1].id);
+    //targetEntity.model.heightReference = Cesium.HeightReference.RELATIVE_TO_GROUND; // XXX: not work?
 
     if (MINIMAPZOOM > 0) {
       viewer.camera.changed.addEventListener(syncMinimap);
@@ -298,43 +209,12 @@ function loadCzml(czml) {
     //viewer.trackedEntity = targetEntity;
     initSlerp(czml[1], targetEntity);
 
-    document.getElementById('loadingOverlay').style.display = 'none';
-    // flyTo
-    viewer.camera.cancelFlight();
-    viewer.clockViewModel.shouldAnimate = false;
-    const tryFlyTo = new Promise((resolve, reject) => {
-      const time = czmlDataSource.clock.startTime;
-      let position = targetEntity.position.getValue(time);
-      if (!position) {
-        resolve();
-        return;
-      }
-      const globe = viewer.scene.globe;
-      const ellipsoid = globe.ellipsoid;
-      const cartographic = ellipsoid.cartesianToCartographic(position);
-      const height = globe.getHeight(cartographic);
-      cartographic.height = (height <= 0 ? HEIGHT_DEFAULT : height) + FLYTOWALK_HEIGHTOFFSET; // XXX:地下になると地表タイル再ロード
-      position = ellipsoid.cartographicToCartesian(cartographic);
-      const quaternion = targetEntity.orientation.getValue(time) || Cesium.Quaternion.IDENTITY;
-      const hpr = Cesium.HeadingPitchRoll.fromQuaternion(quaternion);
-      viewer.camera.flyTo({
-        destination: position,
-        orientation: {
-          heading: hpr.heading - Cesium.Math.toRadians(FLYTOWALK_HEADINGOFFSET),
-          pitch: 0,
-          roll: 0,
-        },
-        maximumHeight: flyToMaxHeight,
-        complete: resolve,
-      });
-    });
-    return tryFlyTo;
-  }).then(() => {
     viewer.clock.onTick.addEventListener(onClockTick);
     viewer.animation.viewModel.playForwardViewModel.command();
-  }).catch(console.error);
+  });
 }
 
+var HEIGHT_DEFAULT = 39.5; // height from ellipsoid
 // height from terrain in [m]
 var HEIGHT_OFFSET = urlParams.has('height') ? +urlParams.get('height') : 2;
 
@@ -442,9 +322,7 @@ const fileInput = document.getElementById("fileElem");
 fileElem.addEventListener("change", () => {
   const [file] = fileElem.files;
   if (file) {
-    file.text().then(text => {
-      loadCzml(JSON.parse(text));
-    }).catch(console.error);
+    file.text().then(text => loadCzml(JSON.parse(text))).catch(console.error);
   }
   //fileElem.value = '';
 });
