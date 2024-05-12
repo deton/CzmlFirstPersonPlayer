@@ -1,6 +1,14 @@
 # CzmlFirstPersonPlayer
 
-## 
+CZMLを一人称視点で再生します。
+
+## CZML内で表示に影響する要素
+* 位置は、czml[1].positionのcartographicDegreesのみ対応(cartesian等には未対応)。
+* czml[1].model.heightReference
+  * CLAMPで始まる場合: terrainに対して、下記HEIGHT_OFFSET固定値を足した値を視点の高さとして使う。
+  * RELATIVEで始まる場合: terrainに対してCZML内の高さを足した値を視点の高さとして使う。
+  * NONEまたは指定無しの場合: CZML内の高さを絶対値として使う。(ellipsoidからの高さ)
+
 ## Parameters
 |URL parameter | JS var | 意味 | default |
 |---|---|---|---|
@@ -9,11 +17,6 @@
 |height|HEIGHT_OFFSET|terrainからの視点の高さ。CZML内のmodel.heightReferenceがCLAMPで始まる場合、terrainに対してこの固定値を足した値を視点の高さとして使う。|2|
 |minimap|MINIMAPZOOM|minimap zoom level. 負の値の場合はminimapを非表示|17|
 
-## CZML内で表示に影響する要素
-* model.heightReference
-  * CLAMPで始まる場合: terrainに対してHEIGHT_OFFSET固定値を足した値を視点の高さとして使う。
-  * RELATIVEで始まる場合: terrainに対してCZML内の高さを足した値を視点の高さとして使う。
-  * NONEまたは指定無しの場合: CZML内の高さを絶対値として使う。(ellipsoidからの高さ)
 
 ## 参考
 * https://github.com/3DGISKing/CesiumJsFirstPersonCameraController

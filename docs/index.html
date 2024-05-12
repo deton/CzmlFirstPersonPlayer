@@ -130,8 +130,10 @@ if (tileset === 'none') {
 } else {
   let tileseturls = urlParams.getAll('tileset');
   if (tileseturls.length === 0) {
-    // 東京都千代田区の建物データ（3D Tiles）
-    tileseturls = ['https://assets.cms.plateau.reearth.io/assets/aa/ecf312-95c2-4e24-8351-642f27e447b6/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13101_chiyoda-ku_lod1/tileset.json'];
+    tileseturls = [
+      // 東京都千代田区の建物データ（3D Tiles）
+      'https://assets.cms.plateau.reearth.io/assets/aa/ecf312-95c2-4e24-8351-642f27e447b6/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13101_chiyoda-ku_lod1/tileset.json',
+    ];
   }
   const bldg3dtiles = new Cesium.PrimitiveCollection();
   Promise.all(
@@ -180,11 +182,17 @@ if (MINIMAPZOOM < 0) {
   }).addTo(minimap);
 }
 
+// to execute on JS console:
+// console.log(updatePathHeightFromTerrain(czml[2].polyline.positions.cartographicDegrees));
+var czml;
+
 let heightReference = 'relative_const';
 let targetEntity;
 const czmlDataSource = new Cesium.CzmlDataSource();
+viewer.dataSources.add(czmlDataSource);
 let minimapLine;
-function loadCzml(czml) {
+function loadCzml(_czml) {
+  czml = _czml;
   targetEntity = null;
   viewer.clockViewModel.shouldAnimate = false;
   viewer.clock.onTick.removeEventListener(onClockTick);
@@ -194,7 +202,6 @@ function loadCzml(czml) {
   }
 
   return czmlDataSource.load(czml).then(dataSource => {
-    viewer.dataSources.add(czmlDataSource);
     targetEntity = czmlDataSource.entities.getById(czml[1].id);
     if (czml[1].model?.heightReference?.startsWith('RELATIVE')) {
       heightReference = 'relative_czml';
@@ -332,6 +339,37 @@ minimapToggleButton.addEventListener('click', () => {
     minimapElem.style.display = 'none';
   }
 });
+
+// positionの高さをterrainに合わせる。
+// polylineをclampToGroundで表示すると、橋の下をくぐる際に、橋の上に
+// 線が引かれてしまうので、terrainの高さで線を引くデータを手で作れるように。
+// XXX: 道の途中が低くなっていると、線が頭上に表示される場合あり。
+// XXX: 道の途中が高くなっていると、線が地面の下になって見えなくなる場合あり。
+function updatePathHeightFromTerrain(cartographicDegrees) {
+  const globe = viewer.scene.globe;
+  const ellipsoid = globe.ellipsoid;
+  //const poslist = [];
+  for (let i = 0; i < cartographicDegrees.length; i += 3) {
+    const cartographic = Cesium.Cartographic.fromDegrees(cartographicDegrees[i], cartographicDegrees[i + 1]);
+    //poslist.push(cartographic);
+    const height = globe.getHeight(cartographic);
+    cartographicDegrees[i + 2] = height;
+    if (height < 0) {
+      console.warn('negative height. terrain may not loaded yet', height);
+    }
+  }
+  return cartographicDegrees;
+  /*
+  return Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, poslist).then(updatedPositions => {
+    let upidx = 0;
+    for (let i = 0; i < cartographicDegrees.length; i += 3) {
+      cartographicDegrees[i + 2] = updatedPositions[upidx].height;
+      upidx++;
+    }
+    return cartographicDegrees;
+  });
+  */
+}
   </script>
 </body>
 </html>
