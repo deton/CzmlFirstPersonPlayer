@@ -197,6 +197,7 @@ function loadCzml(_czml) {
   viewer.clockViewModel.shouldAnimate = false;
   viewer.clock.onTick.removeEventListener(onClockTick);
   viewer.camera.changed.removeEventListener(syncMinimap);
+  czmlDataSource.entities.removeAll();
   if (minimapLine) {
     minimapLine.removeFrom(minimap);
   }
