@@ -38,7 +38,9 @@ CZMLを一人称視点で再生します。
 
 ## Appendix: Create other CZML on other area
 * [Generate network.geojson](https://deton.github.io/GraphFromOSM/)
+  * Example: https://deton.github.io/GraphFromOSM/?bbox=139.69543755054477,35.65887407735725,139.7011882066727,35.66062621586084
 * Load the network.geojson and export CZML using [geojson-path-finder](https://deton.github.io/geojson-path-finder/)
+  * Example: https://deton.github.io/geojson-path-finder/?networkjson=https://gist.githubusercontent.com/deton/c030eae2af830364580727a291913f8e/raw/f1ab3e649e2bde20c6be67ec5be2d3c0f467e040/network-shibuya.geojson&waypointLatLng=35.6590,139.7011&waypointLatLng=35.65956,139.6998&waypointLatLng=35.6601,139.6956
 
 ## See Also
 * https://github.com/3DGISKing/CesiumJsFirstPersonCameraController
