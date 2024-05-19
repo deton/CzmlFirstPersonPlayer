@@ -1,6 +1,12 @@
 # CzmlFirstPersonPlayer
 
 CZMLを一人称視点で再生します。
+主に歩行者からの視点での表示を目的にしています。
+
+## CZML作成方法
+
+* OpenStreetMapデータから道路ネットワークデータを作成して (Appendix A)
+* その道路ネットワークデータを使って、地図上で指定した出発地と目的地間の経路を見つけて、道路上を移動するCZMLを作成 (Appendix B)
 
 ## Example
 
@@ -11,9 +17,14 @@ CZMLを一人称視点で再生します。
 [建築物モデル（千代田区）](https://www.geospatial.jp/ckan/dataset/plateau)を
 手元にダウンロードした上で、localhostから取得する形で表示しています。)
 
+テクスチャ無しの建築物モデルでの表示例:
+https://deton.github.io/CzmlFirstPersonPlayer/?czmlurl=https://deton.github.io/CzmlFirstPersonPlayer/sample.czml
+
 ### Google Photorealistic 3D Tiles
 
 ![google3dtile.png](https://github.com/deton/CzmlFirstPersonPlayer/assets/761487/18d4a062-e8b3-49bb-a819-9b10e92bcd27)
+
+https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=https://deton.github.io/CzmlFirstPersonPlayer/sample.czml
 
 ## Parameters
 |URL parameter | JS var | 意味 | default |
@@ -33,14 +44,12 @@ CZMLを一人称視点で再生します。
   * RELATIVEで始まる場合: terrainに対してCZML内の高さを足した値を視点の高さとして使う。
   * NONEまたは指定無しの場合: CZML内の高さを絶対値として使う。(ellipsoidからの高さ)
 
-## Appendix: Create other CZML
-* Export CZML using [geojson-path-finder](https://deton.github.io/geojson-path-finder/)
-
-## Appendix: Create other CZML on other area
-* [Generate network.geojson](https://deton.github.io/GraphFromOSM/)
-  * Example: https://deton.github.io/GraphFromOSM/?bbox=139.69543755054477,35.65887407735725,139.7011882066727,35.66062621586084
-* Load the network.geojson and export CZML using [geojson-path-finder](https://deton.github.io/geojson-path-finder/)
+## Appendix A: 道路上を移動するCZMLを作成
+* Load the network.geojson and export CZML using [geojson-path-finder](https://github.com/deton/geojson-path-finder)
+  * 使用する道路ネットワークデータは、Appendix Bの方法で作成。
+    * (または、オープンデータの[歩行空間ネットワークデータ(GeoJSON)](https://www.geospatial.jp/ckan/dataset/0401)が使えるかもしれません。)
   * Example: https://deton.github.io/geojson-path-finder/?networkjson=https://gist.githubusercontent.com/deton/c030eae2af830364580727a291913f8e/raw/f1ab3e649e2bde20c6be67ec5be2d3c0f467e040/network-shibuya.geojson&waypointLatLng=35.6590,139.7011&waypointLatLng=35.65956,139.6998&waypointLatLng=35.6601,139.6956
 
-## See Also
-* https://github.com/3DGISKing/CesiumJsFirstPersonCameraController
+## Appendix B: 道路ネットワークデータをOpenStreetMapデータから作成
+* [Generate network.geojson](https://github.com/deton/GraphFromOSM)
+  * Example: https://deton.github.io/GraphFromOSM/?bbox=139.69543755054477,35.65887407735725,139.7011882066727,35.66062621586084
