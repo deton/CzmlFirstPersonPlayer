@@ -2,12 +2,18 @@
 
 CZMLを一人称視点で再生します。
 
-## CZML内で表示に影響する要素
-* 位置は、czml[1].positionのcartographicDegreesのみ対応(cartesian等には未対応)。
-* czml[1].model.heightReference
-  * CLAMPで始まる場合: terrainに対して、下記HEIGHT_OFFSET固定値を足した値を視点の高さとして使う。
-  * RELATIVEで始まる場合: terrainに対してCZML内の高さを足した値を視点の高さとして使う。
-  * NONEまたは指定無しの場合: CZML内の高さを絶対値として使う。(ellipsoidからの高さ)
+## Example
+
+### PLATEAUの3Dタイル
+![sample.gif](sample.gif)
+
+(PLATEAUのテクスチャ付きの建築物の3Dタイルは、
+[建築物モデル（千代田区）](https://www.geospatial.jp/ckan/dataset/plateau)を
+手元にダウンロードした上で、localhostから取得する形で表示しています。)
+
+### Google Photorealistic 3D Tiles
+
+![google3dtile.png](google3dtile.png)
 
 ## Parameters
 |URL parameter | JS var | 意味 | default |
@@ -17,6 +23,19 @@ CZMLを一人称視点で再生します。
 |height|HEIGHT_OFFSET|terrainからの視点の高さ。CZML内のmodel.heightReferenceがCLAMPで始まる場合、terrainに対してこの固定値を足した値を視点の高さとして使う。|2|
 |minimap|MINIMAPZOOM|minimap zoom level. 負の値の場合はminimapを非表示|17|
 
+## CZML内で表示に影響する要素
+* 位置は、czml[1].positionのcartographicDegreesのみ対応(cartesian等には未対応)。
+* czml[1].model.heightReference
+  * CLAMPで始まる場合: terrainに対して、上記HEIGHT_OFFSET固定値を足した値を視点の高さとして使う。
+  * RELATIVEで始まる場合: terrainに対してCZML内の高さを足した値を視点の高さとして使う。
+  * NONEまたは指定無しの場合: CZML内の高さを絶対値として使う。(ellipsoidからの高さ)
 
-## 参考
+## Appendix: Create other CZML
+* Export CZML using [geojson-path-finder](https://deton.github.io/geojson-path-finder/)
+
+## Appendix: Create other CZML on other area
+* [Generate network.geojson](https://deton.github.io/GraphFromOSM/)
+* Load the network.geojson and export CZML using [geojson-path-finder](https://deton.github.io/geojson-path-finder/)
+
+## See Also
 * https://github.com/3DGISKing/CesiumJsFirstPersonCameraController
