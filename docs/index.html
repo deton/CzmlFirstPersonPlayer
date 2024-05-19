@@ -242,7 +242,7 @@ function onClockTick(clock) {
     const globe = viewer.scene.globe;
     const ellipsoid = globe.ellipsoid;
     const cartographic = ellipsoid.cartesianToCartographic(position);
-    const height = globe.getHeight(cartographic);
+    let height = globe.getHeight(cartographic);
     if (height < 0) {
       console.warn('negative height. terrain may not loaded yet', height);
       height = HEIGHT_DEFAULT;
