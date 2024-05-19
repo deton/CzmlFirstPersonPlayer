@@ -5,7 +5,7 @@ CZMLを一人称視点で再生します。
 ## Example
 
 ### PLATEAUの3Dタイル
-![sample.gif](sample.gif)
+![sample.gif](https://github.com/deton/CzmlFirstPersonPlayer/assets/761487/419ea9d9-ed83-4afd-896e-f94a52668d3d)
 
 (PLATEAUのテクスチャ付きの建築物の3Dタイルは、
 [建築物モデル（千代田区）](https://www.geospatial.jp/ckan/dataset/plateau)を
@@ -13,7 +13,7 @@ CZMLを一人称視点で再生します。
 
 ### Google Photorealistic 3D Tiles
 
-![google3dtile.png](google3dtile.png)
+![google3dtile.png](https://github.com/deton/CzmlFirstPersonPlayer/assets/761487/18d4a062-e8b3-49bb-a819-9b10e92bcd27)
 
 ## Parameters
 |URL parameter | JS var | 意味 | default |
