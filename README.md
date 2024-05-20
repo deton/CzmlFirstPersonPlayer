@@ -11,7 +11,7 @@ CZMLを一人称視点で再生します。
 ## Example
 
 ### PLATEAUの3Dタイル
-![sample.gif](https://github.com/deton/CzmlFirstPersonPlayer/assets/761487/419ea9d9-ed83-4afd-896e-f94a52668d3d)
+https://github.com/deton/CzmlFirstPersonPlayer/assets/761487/e008acad-fe89-4c27-9cf0-01cde59ad7ff
 
 (PLATEAUのテクスチャ付きの建築物の3Dタイルは、
 [建築物モデル（千代田区）](https://www.geospatial.jp/ckan/dataset/plateau)を
