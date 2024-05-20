@@ -5,6 +5,7 @@ CZMLを一人称視点で再生します。
 
 ## CZML作成方法
 
+ブラウザだけで作成可能:
 * OpenStreetMapデータから道路ネットワークデータを作成して (Appendix A)
 * その道路ネットワークデータを使って、地図上で指定した出発地と目的地間の経路を見つけて、道路上を移動するCZMLを作成 (Appendix B)
 
@@ -34,7 +35,7 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
 |height|HEIGHT_OFFSET|terrainからの視点の高さ。CZML内のmodel.heightReferenceがCLAMPで始まる場合、terrainに対してこの固定値を足した値を視点の高さとして使う。|2|
 |minimap|MINIMAPZOOM|minimap zoom level. 負の値の場合はminimapを非表示|17|
 
-* Example(PLATEAU配信サービス): https://deton.github.io/CzmlFirstPersonPlayer/?tileset=https://assets.cms.plateau.reearth.io/assets/e3/b36cac-6c5e-430c-8366-f43e8efcf146/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13113_shibuya-ku_lod1/tileset.json&czmlurl=https://gist.githubusercontent.com/deton/c030eae2af830364580727a291913f8e/raw/4b580611bf0ca785830ba483d32085a2dbe8b0aa/path-shibuya.czml
+* Example([PLATEAU配信サービス](https://github.com/Project-PLATEAU/plateau-streaming-tutorial)): https://deton.github.io/CzmlFirstPersonPlayer/?tileset=https://assets.cms.plateau.reearth.io/assets/e3/b36cac-6c5e-430c-8366-f43e8efcf146/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13113_shibuya-ku_lod1/tileset.json&czmlurl=https://gist.githubusercontent.com/deton/c030eae2af830364580727a291913f8e/raw/4b580611bf0ca785830ba483d32085a2dbe8b0aa/path-shibuya.czml
 * Example(Google Photorealistic 3D tileset): https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=https://gist.githubusercontent.com/deton/c030eae2af830364580727a291913f8e/raw/4b580611bf0ca785830ba483d32085a2dbe8b0aa/path-shibuya.czml
 
 ## CZML内で表示に影響する要素
