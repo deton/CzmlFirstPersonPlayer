@@ -65,7 +65,14 @@
   <button id="minimapToggleButton">&#x1f441;</button>
   <script>
 'use strict';
-Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(139.7688, 35.6970, 139.7761, 35.7031);
+const urlParams = new URLSearchParams(document.location.search);
+let viewrect = urlParams.get('viewrect');
+if (viewrect) {
+  viewrect = viewrect.split(',').map(s => Number(s));
+  Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(...viewrect);
+} else {
+  Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(139.7688, 35.6970, 139.7761, 35.7031);
+}
 Cesium.Camera.DEFAULT_VIEW_FACTOR = 0;
 
 // Cesium ionの読み込み指定
@@ -120,7 +127,17 @@ var viewer = new Cesium.Viewer("cesiumContainer", {
   geocoder: false,
 });
 
-const urlParams = new URLSearchParams(document.location.search);
+if (!viewrect) {
+  viewer.camera.setView({
+    destination: Cesium.Cartesian3.fromDegrees(139.77398, 35.69403, 1042),
+    orientation: {
+      heading: Cesium.Math.toRadians(355),
+      pitch: Cesium.Math.toRadians(-55),
+      roll: 0
+    }
+  });
+}
+
 const tileset = urlParams.get('tileset');
 if (tileset === 'none') {
 } else if (tileset === 'google3dtile') {
@@ -143,18 +160,11 @@ if (tileset === 'none') {
   ).then(tilesets => {
     tilesets.forEach(t => bldg3dtiles.add(t));
     viewer.scene.primitives.add(bldg3dtiles);
-    //viewer.flyTo(tilesets[0]);
+    if (!viewrect && tileset) {
+      viewer.flyTo(tilesets[0]);
+    }
   }).catch(console.error);
 }
-
-viewer.camera.setView({
-  destination: Cesium.Cartesian3.fromDegrees(139.77398, 35.69403, 1042),
-  orientation: {
-    heading: Cesium.Math.toRadians(355),
-    pitch: Cesium.Math.toRadians(-55),
-    roll: 0
-  }
-});
 
 const czmlurl = urlParams.get('czmlurl');
 if (czmlurl) {
@@ -175,6 +185,9 @@ if (MINIMAPZOOM < 0) {
     zoom: MINIMAPZOOM,
     layers: [osmmap],
   });
+  if (viewrect) {
+    minimap.fitBounds([[viewrect[1], viewrect[0]], [viewrect[3], viewrect[2]]]);
+  }
   var minimapMarker = L.circleMarker(minimap.getCenter(), {
     radius: 4,
     fill: true,

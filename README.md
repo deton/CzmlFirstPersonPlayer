@@ -31,6 +31,7 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
 |URL parameter | JS var | 意味 | default |
 |---|---|---|---|
 |czmlurl||CZML URL to load||
+|viewrect||初期表示領域(west,south,east,north)|'139.7688,35.6970,139.7761,35.7031'|
 |tileset||'none':読み込まない。'google3dtile':Google Photorealistic 3D tileset。それ以外の場合:3D tileset URL. 複数回指定した場合は全て読み込む。|'https://assets.cms.plateau.reearth.io/assets/aa/ecf312-95c2-4e24-8351-642f27e447b6/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13101_chiyoda-ku_lod1/tileset.json'|
 |height|HEIGHT_OFFSET|terrainからの視点の高さ。CZML内のmodel.heightReferenceがCLAMPで始まる場合、terrainに対してこの固定値を足した値を視点の高さとして使う。|2|
 |minimap|MINIMAPZOOM|minimap zoom level. 負の値の場合はminimapを非表示|17|
