@@ -187,6 +187,9 @@ if (MINIMAPZOOM < 0) {
   });
   if (viewrect) {
     minimap.fitBounds([[viewrect[1], viewrect[0]], [viewrect[3], viewrect[2]]]);
+    if (urlParams.has('minimap')) {
+      minimap.setZoom(MINIMAPZOOM);
+    }
   }
   var minimapMarker = L.circleMarker(minimap.getCenter(), {
     radius: 4,
