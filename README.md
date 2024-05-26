@@ -68,7 +68,7 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
 * Cesium ionにUploadして緯度経度高さとscaleを決定。
 * ローカルでtileset.jsonを作る場合は、
   [3d-tiles-tools](https://github.com/CesiumGS/3d-tiles-tools#createtilesetjson)で、
-  `npx 3d-tiles-tools createTilesetJson -i PQ_Remake_AKIHABARA.glb -o tileset.json -f --cartographicPositionDegrees 139.77024 35.69602 38`
+  `npx 3d-tiles-tools createTilesetJson -i PQ_Remake_AKIHABARA.glb -o tileset.json --cartographicPositionDegrees 139.77024 35.69602 38`
   * 表示させてみると小さいのでscaleを100にするため、(3d-tiles-toolsのソースを参考に)以下で調べたtransform値で、tileset.jsonのroot.transformを更新。
   ```js
   var transform = bldg3dtiles.get(0).root.transform;
