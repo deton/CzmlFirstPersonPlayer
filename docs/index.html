@@ -359,6 +359,15 @@ minimapToggleButton.addEventListener('click', () => {
   }
 });
 
+// CZML再生中はカメラ操作が効かないが、再生をやめて周りを見回したい場合向け。
+function stopPlayAndEnableCameraControl() {
+  targetEntity = null;
+  viewer.clockViewModel.shouldAnimate = false;
+  viewer.clock.onTick.removeEventListener(onClockTick);
+  viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+  fileElem.value = '';
+}
+
 // positionの高さをterrainに合わせる。
 // polylineをclampToGroundで表示すると、橋の下をくぐる際に、橋の上に
 // 線が引かれてしまうので、terrainの高さで線を引くデータを手で作れるように。
