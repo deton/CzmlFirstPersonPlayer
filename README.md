@@ -12,7 +12,7 @@ CZMLを一人称視点で再生します。
 ## Example
 
 ### PLATEAUの3Dタイル
-https://github.com/deton/CzmlFirstPersonPlayer/assets/761487/e008acad-fe89-4c27-9cf0-01cde59ad7ff
+https://github.com/deton/CzmlFirstPersonPlayer/assets/761487/b254c367-1292-4354-87d1-58f754ceffcd
 
 (PLATEAUのテクスチャ付きの建築物の3Dタイルは、
 [建築物モデル（千代田区）](https://www.geospatial.jp/ckan/dataset/plateau)を
@@ -29,7 +29,7 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
 
 ### [ZENRIN City Asset Series](https://www.zenrin.co.jp/contents/product/service/3d/asset/)
 
-![zenrin3dtile](https://github.com/deton/CzmlFirstPersonPlayer/assets/761487/bb64b306-2459-43b5-9f7a-7f71bfbbc069)
+![zenrin3dtile](https://github.com/deton/CzmlFirstPersonPlayer/assets/761487/8c506870-addc-467d-af10-57d65f3b4630)
 
 (ZENRIN City Asset SeriesのJapanese Otaku CityのFBXを3D Tilesに変換して使用。Appendix C)
 
