@@ -152,7 +152,7 @@ if (tileset === 'none') {
       'https://assets.cms.plateau.reearth.io/assets/aa/ecf312-95c2-4e24-8351-642f27e447b6/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13101_chiyoda-ku_lod1/tileset.json',
     ];
   }
-  const bldg3dtiles = new Cesium.PrimitiveCollection();
+  var bldg3dtiles = new Cesium.PrimitiveCollection();
   Promise.all(
     tileseturls.map(url => Cesium.Cesium3DTileset.fromUrl(url, {
       luminanceAtZenith: 0.5,
