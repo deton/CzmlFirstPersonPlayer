@@ -155,10 +155,12 @@ if (tileset === 'none') {
   var bldg3dtiles = new Cesium.PrimitiveCollection();
   Promise.all(
     tileseturls.map(url => Cesium.Cesium3DTileset.fromUrl(url, {
-      luminanceAtZenith: 0.5,
     }))
   ).then(tilesets => {
-    tilesets.forEach(t => bldg3dtiles.add(t));
+    tilesets.forEach(t => {
+      t.imageBasedLighting.luminanceAtZenith = 0.5;
+      bldg3dtiles.add(t);
+    });
     viewer.scene.primitives.add(bldg3dtiles);
     if (!viewrect && tileset) {
       viewer.flyTo(tilesets[0]);
