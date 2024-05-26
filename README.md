@@ -29,7 +29,7 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
 
 ### [ZENRIN City Asset Series](https://www.zenrin.co.jp/contents/product/service/3d/asset/)
 
-![zenrin3dtile.png]()
+![zenrin3dtile](https://github.com/deton/CzmlFirstPersonPlayer/assets/761487/bb64b306-2459-43b5-9f7a-7f71bfbbc069)
 
 (ZENRIN City Asset SeriesのJapanese Otaku CityのFBXを3D Tilesに変換して使用。Appendix C)
 
