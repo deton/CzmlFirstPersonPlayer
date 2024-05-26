@@ -27,6 +27,12 @@ https://deton.github.io/CzmlFirstPersonPlayer/?czmlurl=https://deton.github.io/C
 
 https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=https://deton.github.io/CzmlFirstPersonPlayer/sample.czml
 
+### [ZENRIN City Asset Series](https://www.zenrin.co.jp/contents/product/service/3d/asset/)
+
+![zenrin3dtile](https://github.com/deton/CzmlFirstPersonPlayer/assets/761487/bb64b306-2459-43b5-9f7a-7f71bfbbc069)
+
+(ZENRIN City Asset SeriesのJapanese Otaku CityのFBXを3D Tilesに変換して使用。Appendix C)
+
 ## Parameters
 |URL parameter | JS var | 意味 | default |
 |---|---|---|---|
@@ -55,3 +61,20 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
 ## Appendix B: 道路ネットワークデータをOpenStreetMapデータから作成
 * [Generate network.geojson](https://github.com/deton/GraphFromOSM)
   * Example: https://deton.github.io/GraphFromOSM/?bbox=139.69543755054477,35.65887407735725,139.7011882066727,35.66062621586084
+
+
+## Appendix C: ZENRIN City Asset SeriesのJapanese Otaku CityのFBXを3D Tilesに変換して使用
+* FBXを[FBX2glTF](https://github.com/godotengine/FBX2glTF)でglbに変換。(Textures/等のファイル群をfbxファイルと同じ場所に集めて実行)
+* Cesium ionにUploadして緯度経度高さとscaleを決定。
+* ローカルでtileset.jsonを作る場合は、
+  [3d-tiles-tools](https://github.com/CesiumGS/3d-tiles-tools#createtilesetjson)で、
+  `npx 3d-tiles-tools createTilesetJson -i PQ_Remake_AKIHABARA.glb -o tileset.json --cartographicPositionDegrees 139.77024 35.69602 38`
+  * 表示させてみると小さいのでscaleを100にするため、(3d-tiles-toolsのソースを参考に)以下で調べたtransform値で、tileset.jsonのroot.transformを更新。
+  ```js
+  var transform = bldg3dtiles.get(0).root.transform;
+  var scale = 100;
+  var modelMatrix = Cesium.Matrix4.multiplyByUniformScale(transform, scale, new Cesium.Matrix4());
+  console.log(Cesium.Matrix4.toArray(modelMatrix));
+  ```
+  * creditは後から追加。
+  `viewer.creditDisplay.addStaticCredit(new Cesium.Credit('3D city model by &copy;ZENRIN', true));`
