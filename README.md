@@ -1,22 +1,21 @@
 # CzmlFirstPersonPlayer
 
-CZMLを一人称視点で再生します。
-主に歩行者からの視点での表示を目的にしています。
+* CZMLファイルを一人称視点で再生します。
+* 道案内用途など、主に歩行者からの視点での表示を目的にしています。
 
-## CZML作成方法
+## 道にそって移動するCZMLファイルの作成方法
 
 ブラウザだけで作成可能:
-* OpenStreetMapデータから道路ネットワークデータを作成して (Appendix A)
-* その道路ネットワークデータを使って、地図上で指定した出発地と目的地間の経路を見つけて、道路上を移動するCZMLを作成 (Appendix B)
+* OpenStreetMapデータから道路ネットワークデータを作成して (Appendix B)
+* その道路ネットワークデータを使って、地図上で指定した出発地と目的地間の経路を見つけて、道路上を移動するCZMLを作成 (Appendix A)
 
 ## Example
-
 ### PLATEAUの3Dタイル
 https://github.com/deton/CzmlFirstPersonPlayer/assets/761487/b254c367-1292-4354-87d1-58f754ceffcd
 
 (PLATEAUのテクスチャ付きの建築物の3Dタイルは、
 [建築物モデル（千代田区）](https://www.geospatial.jp/ckan/dataset/plateau)を
-手元にダウンロードした上で、localhostから取得する形で表示しています。)
+手元にダウンロードした上で、http://localhost:8000から取得する形で表示しています。)
 
 テクスチャ無しの建築物モデルでの表示例:
 https://deton.github.io/CzmlFirstPersonPlayer/?czmlurl=https://deton.github.io/CzmlFirstPersonPlayer/sample.czml
@@ -33,17 +32,30 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
 
 (ZENRIN City Asset SeriesのJapanese Otaku CityのFBXを3D Tilesに変換して使用。Appendix C)
 
-## Parameters
-|URL parameter | JS var | 意味 | default |
-|---|---|---|---|
-|czmlurl||CZML URL to load||
-|viewrect||初期表示領域(west,south,east,north)|'139.7688,35.6970,139.7761,35.7031'|
-|tileset||'none':読み込まない。'google3dtile':Google Photorealistic 3D tileset。それ以外の場合:3D tileset URL. 複数回指定した場合は全て読み込む。|'https://assets.cms.plateau.reearth.io/assets/aa/ecf312-95c2-4e24-8351-642f27e447b6/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13101_chiyoda-ku_lod1/tileset.json'|
-|height|HEIGHT_OFFSET|terrainからの視点の高さ。CZML内のmodel.heightReferenceがCLAMPで始まる場合、terrainに対してこの固定値を足した値を視点の高さとして使う。|2|
-|minimap|MINIMAPZOOM|minimap zoom level. 負の値の場合はminimapを非表示|17|
+## URL Parameters
+* czmlurl: 読み込むCZMLファイルのURL。
+* viewrect: 初期表示領域(west,south,east,north)
+  * (default): 139.7688,35.6970,139.7761,35.703
+* tileset: 3D tileset URL
+  * none: 読み込まない。
+  * google3dtile: Google Photorealistic 3D tileset
+  * それ以外の場合: 3D tileset URL。複数回指定した場合は全て読み込む。
+  * (default): https://assets.cms.plateau.reearth.io/assets/aa/ecf312-95c2-4e24-8351-642f27e447b6/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13101_chiyoda-ku_lod1/tileset.json
+  * (備考): この他、CZMLファイル内で指定したtilesetも読み込まれます。
+* height: terrainからの視点の高さ。CZML内のmodel.heightReferenceがCLAMPで始まる場合、terrainに対してこの固定値を足した値を視点の高さとして使う。
+  * (default): 2
+  * (備考): (JavaScript ConsoleでHEIGHT_OFFSETを変更することで調整可能)
+* minimap: minimap zoom level. 負の値の場合はminimapを非表示
+  * (default): 17
 
-* Example([PLATEAU配信サービス](https://github.com/Project-PLATEAU/plateau-streaming-tutorial)): https://deton.github.io/CzmlFirstPersonPlayer/?tileset=https://assets.cms.plateau.reearth.io/assets/e3/b36cac-6c5e-430c-8366-f43e8efcf146/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13113_shibuya-ku_lod1/tileset.json&czmlurl=https://gist.githubusercontent.com/deton/c030eae2af830364580727a291913f8e/raw/4b580611bf0ca785830ba483d32085a2dbe8b0aa/path-shibuya.czml
-* Example(Google Photorealistic 3D tileset): https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=https://gist.githubusercontent.com/deton/c030eae2af830364580727a291913f8e/raw/4b580611bf0ca785830ba483d32085a2dbe8b0aa/path-shibuya.czml
+### URL Parameter Example
+* [PLATEAU配信サービス](https://github.com/Project-PLATEAU/plateau-streaming-tutorial): https://deton.github.io/CzmlFirstPersonPlayer/?tileset=https://assets.cms.plateau.reearth.io/assets/e3/b36cac-6c5e-430c-8366-f43e8efcf146/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13113_shibuya-ku_lod1/tileset.json&czmlurl=https://gist.githubusercontent.com/deton/c030eae2af830364580727a291913f8e/raw/4b580611bf0ca785830ba483d32085a2dbe8b0aa/path-shibuya.czml
+* Google Photorealistic 3D tileset: https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=https://gist.githubusercontent.com/deton/c030eae2af830364580727a291913f8e/raw/4b580611bf0ca785830ba483d32085a2dbe8b0aa/path-shibuya.czml
+
+## 建物の3Dタイル
+* [PLATEAU配信サービス](https://github.com/Project-PLATEAU/plateau-streaming-tutorial/blob/main/3d-tiles/plateau-3dtiles-streaming.md#4-%E9%85%8D%E4%BF%A1%E3%83%87%E3%83%BC%E3%82%BF3d-tiles%E4%B8%80%E8%A6%A7)
+  * (表示に時間がかかったり、テクスチャが表示されなかったりする場合は、[3D都市モデル（Project PLATEAU）ポータルサイト](https://www.geospatial.jp/ckan/dataset/plateau)から3D Tilesのzipをダウンロード・展開して、localhostのhttp serverから取得する形にすると良いかもしれません。)
+  * (PLATEAU VIEWで見ると、歩道橋などは橋梁モデル(LOD2)に含まれている場合があるようです。)
 
 ## CZML内で表示に影響する要素
 * 位置は、czml[1].positionのcartographicDegreesのみ対応(cartesian等には未対応)。
@@ -52,16 +64,22 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
   * RELATIVEで始まる場合: terrainに対してCZML内の高さを足した値を視点の高さとして使う。
   * NONEまたは指定無しの場合: CZML内の高さを絶対値として使う。(ellipsoidからの高さ)
 
+## 備考
+* 再生開始後はドラッグ等によるCamera操作が効かなくなります。
+  * 再生を中止して、Camera操作を有効にするには、JavaScript Consoleで`stopPlayAndEnableCameraControl();`
+
 ## Appendix A: 道路上を移動するCZMLを作成
 * Load the network.geojson and export CZML using [geojson-path-finder](https://github.com/deton/geojson-path-finder)
   * 使用する道路ネットワークデータは、Appendix Bの方法で作成。
     * (または、オープンデータの[歩行空間ネットワークデータ(GeoJSON)](https://www.geospatial.jp/ckan/dataset/0401)が使えるかもしれません。)
   * Example: https://deton.github.io/geojson-path-finder/?networkjson=https://gist.githubusercontent.com/deton/c030eae2af830364580727a291913f8e/raw/f1ab3e649e2bde20c6be67ec5be2d3c0f467e040/network-shibuya.geojson&waypointLatLng=35.6590,139.7011&waypointLatLng=35.65956,139.6998&waypointLatLng=35.6601,139.6956
+  * 備考: 地表に表示される移動経路の線を、polylineとしてCZMLに入れて生成しています。
+    * 非表示にしたい場合は、CZMLからpolylineを削除するか、`"show": false`を追加してください。
+    * 移動経路のpolylineは`"clampToGround": true`で表示しているので、橋の下を通る場合など、橋の上に線が表示されます。地表の高さで線を表示するデータを作る場合は、CzmlFirstPersonPlayerのJavaScript Consoleで`console.log(updatePathHeightFromTerrain(czml[2].polyline.positions.cartographicDegrees));`
 
 ## Appendix B: 道路ネットワークデータをOpenStreetMapデータから作成
 * [Generate network.geojson](https://github.com/deton/GraphFromOSM)
   * Example: https://deton.github.io/GraphFromOSM/?bbox=139.69543755054477,35.65887407735725,139.7011882066727,35.66062621586084
-
 
 ## Appendix C: ZENRIN City Asset SeriesのJapanese Otaku CityのFBXを3D Tilesに変換して使用
 * FBXを[FBX2glTF](https://github.com/godotengine/FBX2glTF)でglbに変換。(Textures/等のファイル群をfbxファイルと同じ場所に集めて実行)
