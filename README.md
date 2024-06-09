@@ -15,7 +15,7 @@ https://github.com/deton/CzmlFirstPersonPlayer/assets/761487/b254c367-1292-4354-
 
 (PLATEAUのテクスチャ付きの建築物の3Dタイルは、
 [建築物モデル（千代田区）](https://www.geospatial.jp/ckan/dataset/plateau)を
-手元にダウンロードした上で、http://localhost:8000から取得する形で表示しています。)
+手元にダウンロードした上で、`http://localhost:8000`から取得する形で表示しています。)
 
 テクスチャ無しの建築物モデルでの表示例:
 https://deton.github.io/CzmlFirstPersonPlayer/?czmlurl=https://deton.github.io/CzmlFirstPersonPlayer/sample.czml

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>CZML First Person Player</title>
-  <script src="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Cesium.js"></script>
-  <link href="https://cesium.com/downloads/cesiumjs/releases/1.117/Build/Cesium/Widgets/widgets.css" rel="stylesheet"></head>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.118/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.118/Build/Cesium/Widgets/widgets.css" rel="stylesheet"></head>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""/>
@@ -264,8 +264,8 @@ function onClockTick(clock) {
     const ellipsoid = globe.ellipsoid;
     const cartographic = ellipsoid.cartesianToCartographic(position);
     let height = globe.getHeight(cartographic);
-    if (height < 0) {
-      console.warn('negative height. terrain may not loaded yet', height);
+    if (height === undefined || height < 0) {
+      console.warn('height is undefined or negative. terrain may not loaded yet', height);
       height = HEIGHT_DEFAULT;
     }
     if (heightReference === 'relative_const') {
