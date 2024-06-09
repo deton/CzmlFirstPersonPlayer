@@ -1,6 +1,6 @@
 # CzmlFirstPersonPlayer
 
-* CZMLファイルを一人称視点で再生します。
+* CZMLファイルを一人称視点で再生します。(CesiumJSを利用)
 * 道案内用途など、主に歩行者からの視点での表示を目的にしています。
 
 ## 道にそって移動するCZMLファイルの作成方法
@@ -37,8 +37,9 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
 * viewrect: 初期表示領域(west,south,east,north)
   * (default): 139.7688,35.6970,139.7761,35.703
 * tileset: 3D tileset URL
-  * none: 読み込まない。
-  * google3dtile: Google Photorealistic 3D tileset
+  * `none`: 読み込まない。
+  * `google3dtile`: Google Photorealistic 3D tileset
+  * 数値: Cesium ion asset id
   * それ以外の場合: 3D tileset URL。複数回指定した場合は全て読み込む。
   * (default): https://assets.cms.plateau.reearth.io/assets/aa/ecf312-95c2-4e24-8351-642f27e447b6/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13101_chiyoda-ku_lod1/tileset.json
   * (備考): この他、CZMLファイル内で指定したtilesetも読み込まれます。
@@ -47,6 +48,8 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
   * (備考): (JavaScript ConsoleでHEIGHT_OFFSETを変更することで調整可能)
 * minimap: minimap zoom level. 負の値の場合はminimapを非表示
   * (default): 17
+* token: Cesium ion access token
+  * (default): ([PLATEAU配信サービス](https://github.com/Project-PLATEAU/plateau-streaming-tutorial/blob/main/terrain/plateau-terrain-streaming.md#21-%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%83%88%E3%83%BC%E3%82%AF%E3%83%B3%E5%8F%8A%E3%81%B3%E3%82%A2%E3%82%BB%E3%83%83%E3%83%88id)のtoken)
 
 ### URL Parameter Example
 * [PLATEAU配信サービス](https://github.com/Project-PLATEAU/plateau-streaming-tutorial): https://deton.github.io/CzmlFirstPersonPlayer/?tileset=https://assets.cms.plateau.reearth.io/assets/e3/b36cac-6c5e-430c-8366-f43e8efcf146/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13113_shibuya-ku_lod1/tileset.json&czmlurl=https://gist.githubusercontent.com/deton/c030eae2af830364580727a291913f8e/raw/4b580611bf0ca785830ba483d32085a2dbe8b0aa/path-shibuya.czml
