@@ -11,6 +11,9 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""></script>
+  <!-- https://github.com/aistairc/gsj_numerical_png_terrain_provider -->
+  <script src="NumericalPngTerrainProvider.js"></script>
+  <script src="ExtendedNumericalPngTerrainProvider.js"></script>
 </head>
 <style>
   #cesiumContainer {
@@ -76,6 +79,15 @@ if (viewrect) {
 Cesium.Camera.DEFAULT_VIEW_FACTOR = 0;
 
 const terrainViewModels = Cesium.createDefaultTerrainProviderViewModels();
+terrainViewModels.push(new Cesium.ProviderViewModel({
+  name: 'GSJ Terrain',
+  tooltip: 'GSJ Terrain',
+  iconUrl: 'https://gbank.gsj.jp/favicon.ico',
+  category: 'Other',
+  creationFunction: function () {
+    return new ExtendedNumericalPngTerrainProvider({useGeoid: true});
+  }
+}));
 const token = urlParams.get('token');
 if (token) {
   Cesium.Ion.defaultAccessToken = token;
