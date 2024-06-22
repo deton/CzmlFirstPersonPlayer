@@ -247,7 +247,6 @@ function loadCzml(_czml) {
   });
 }
 
-var HEIGHT_DEFAULT = 39.5; // height from ellipsoid
 // height from terrain in [m] for heightReference == 'relative_const'
 var HEIGHT_OFFSET = urlParams.has('height') ? +urlParams.get('height') : 2;
 
@@ -263,10 +262,10 @@ function onClockTick(clock) {
     const globe = viewer.scene.globe;
     const ellipsoid = globe.ellipsoid;
     const cartographic = ellipsoid.cartesianToCartographic(position);
-    let height = globe.getHeight(cartographic);
-    if (height === undefined || height < 0) {
-      console.warn('height is undefined or negative. terrain may not loaded yet', height);
-      height = HEIGHT_DEFAULT;
+    const height = globe.getHeight(cartographic); // height from ellipsoid
+    if (height === undefined || height < -1000) {
+      console.warn('height is undefined or lower than -1000. terrain may not loaded yet', height);
+      return;
     }
     if (heightReference === 'relative_const') {
       cartographic.height = height + HEIGHT_OFFSET;
@@ -384,10 +383,10 @@ function updatePathHeightFromTerrain(cartographicDegrees) {
     const cartographic = Cesium.Cartographic.fromDegrees(cartographicDegrees[i], cartographicDegrees[i + 1]);
     //poslist.push(cartographic);
     const height = globe.getHeight(cartographic);
-    cartographicDegrees[i + 2] = height;
-    if (height < 0) {
-      console.warn('negative height. terrain may not loaded yet', height);
+    if (height === undefined || height < -1000) {
+      console.warn('height is undefined or lower than -1000. terrain may not loaded yet', height);
     }
+    cartographicDegrees[i + 2] = height;
   }
   return cartographicDegrees;
   /*
