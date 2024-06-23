@@ -77,14 +77,14 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
 * Load the network.geojson and export CZML using [geojson-path-finder](https://github.com/deton/geojson-path-finder)
   * 使用する道路ネットワークデータは、Appendix Bの方法で作成。
     * (または、オープンデータの[歩行空間ネットワークデータ(GeoJSON)](https://www.geospatial.jp/ckan/dataset/0401)が使えるかもしれません。)
-  * Example: https://deton.github.io/geojson-path-finder/?networkjson=https://gist.githubusercontent.com/deton/c030eae2af830364580727a291913f8e/raw/f1ab3e649e2bde20c6be67ec5be2d3c0f467e040/network-shibuya.geojson&waypointLatLng=35.6590,139.7011&waypointLatLng=35.65956,139.6998&waypointLatLng=35.6601,139.6956
+  * Example: https://deton.github.io/geojson-path-finder/?networkjson=https://gist.githubusercontent.com/deton/c030eae2af830364580727a291913f8e/raw/28913a796a5ecad82b5990ed10c6d9b5c981c4a1/network-shibuya.geojson&waypointLatLng=35.6590,139.7011&waypointLatLng=35.65956,139.6998&waypointLatLng=35.6601,139.6956
   * 備考: 地表に表示される移動経路の線を、polylineとしてCZMLに入れて生成しています。
     * 非表示にしたい場合は、CZMLからpolylineを削除するか、`"show": false`を追加してください。
     * 移動経路のpolylineは`"clampToGround": true`で表示しているので、橋の下を通る場合など、橋の上に線が表示されます。地表の高さで線を表示するデータを作る場合は、CzmlFirstPersonPlayerのJavaScript Consoleで`console.log(updatePathHeightFromTerrain(czml[2].polyline.positions.cartographicDegrees));`
 
 ## Appendix B: 道路ネットワークデータをOpenStreetMapデータから作成
 * [Generate network.geojson](https://github.com/deton/GraphFromOSM)
-  * Example: https://deton.github.io/GraphFromOSM/?bbox=139.69543755054477,35.65887407735725,139.7011882066727,35.66062621586084
+  * Example: https://deton.github.io/GraphFromOSM/?bbox=139.6954429149628,35.65743572597212,139.70327496528628,35.66243933363614
 
 ## Appendix C: ZENRIN City Asset SeriesのJapanese Otaku CityのFBXを3D Tilesに変換して使用
 * FBXを[FBX2glTF](https://github.com/godotengine/FBX2glTF)でglbに変換。(Textures/等のファイル群をfbxファイルと同じ場所に集めて実行)
