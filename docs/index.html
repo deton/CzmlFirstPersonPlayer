@@ -152,10 +152,12 @@ if (!viewrect) {
   });
 }
 
+const tilesetHeightOffset = +urlParams.get('tilesetHeightOffset');
 const tileset = urlParams.get('tileset');
 if (tileset === 'none') {
 } else if (tileset === 'google3dtile') {
   Cesium.createGooglePhotorealistic3DTileset().then(t => {
+    setTilesetHeightOffset(t, tilesetHeightOffset);
     viewer.scene.primitives.add(t);
   }).catch(console.error);
 } else {
@@ -174,6 +176,7 @@ if (tileset === 'none') {
   ).then(tilesets => {
     tilesets.forEach(t => {
       t.imageBasedLighting.luminanceAtZenith = 0.5;
+      setTilesetHeightOffset(t, tilesetHeightOffset);
       bldg3dtiles.add(t);
     });
     viewer.scene.primitives.add(bldg3dtiles);
@@ -181,6 +184,18 @@ if (tileset === 'none') {
       viewer.flyTo(tilesets[0]);
     }
   }).catch(console.error);
+}
+
+function setTilesetHeightOffset(tileset, heightOffset) {
+  if (!heightOffset) {
+    return;
+  }
+  // from Example in CesiumJS API ref-doc
+  const cartographic = Cesium.Cartographic.fromCartesian(tileset.boundingSphere.center);
+  const surface = Cesium.Cartesian3.fromRadians(cartographic.longitude, cartographic.latitude, 0.0);
+  const offset = Cesium.Cartesian3.fromRadians(cartographic.longitude, cartographic.latitude, heightOffset);
+  const translation = Cesium.Cartesian3.subtract(offset, surface, new Cesium.Cartesian3());
+  tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
 }
 
 const czmlurl = urlParams.get('czmlurl');
