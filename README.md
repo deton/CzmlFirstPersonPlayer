@@ -43,13 +43,22 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
   * それ以外の場合: 3D tileset URL。複数回指定した場合は全て読み込む。
   * (default): https://assets.cms.plateau.reearth.io/assets/aa/ecf312-95c2-4e24-8351-642f27e447b6/13100_tokyo23-ku_2022_3dtiles_1_1_op_bldg_13101_chiyoda-ku_lod1/tileset.json
   * (備考): この他、CZMLファイル内で指定したtilesetも読み込まれます。
-* tilesetHeightOffset: tilesetの高さ調整用のオフセット値。
+* tilesetHeightOffset: tilesetの高さ調整用のオフセット値[m]。
   * (default): 0
-* height: terrainからの視点の高さ。CZML内のmodel.heightReferenceがCLAMPで始まる場合、terrainに対してこの固定値を足した値を視点の高さとして使う。
+* height: terrainからの視点の高さ[m]。CZML内のmodel.heightReferenceがCLAMPで始まる場合、terrainに対してこの固定値を足した値を視点の高さとして使う。
   * (default): 2
   * (備考): (JavaScript ConsoleでHEIGHT_OFFSETを変更することで調整可能)
 * minimap: minimap zoom level. 負の値の場合はminimapを非表示
   * (default): 17
+* imageryIdx: 地表面画像のindex。後からBaseLayerPicker(画面右上端から2個目のアイコン)で変更可能。
+  * `-1`: [PLATEAU配信サービス](https://github.com/Project-PLATEAU/plateau-streaming-tutorial/blob/main/ortho/plateau-ortho-streaming.md)のPLATEAU-Ortho
+  * `-2`: [地理院タイル(写真)](https://maps.gsi.go.jp/development/ichiran.html#seamlessphoto)
+  * (default): 0 (CesiumJSデフォルトのBing Maps Aerial)
+* terrainIdx: 地表面地形のindex。後からBaseLayerPicker(画面右上端から2個目のアイコン)で変更可能。
+  * `-1`: [PLATEAU配信サービス](https://github.com/Project-PLATEAU/plateau-streaming-tutorial/blob/main/terrain/plateau-terrain-streaming.md)のPLATEAU-Terrain
+  * `-2`: 産総研 地質調査総合センターの[標高タイルサービス](https://github.com/aistairc/gsj_numerical_png_terrain_provider)
+  * (ただし、tokenにPLATEAU配信サービス以外のtoken指定時は、PLATEAU-Terrainは使えないので、`-1`が標高タイルサービスになります。)
+  * (default): -1
 * token: Cesium ion access token
   * (default): ([PLATEAU配信サービス](https://github.com/Project-PLATEAU/plateau-streaming-tutorial/blob/main/terrain/plateau-terrain-streaming.md#21-%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%83%88%E3%83%BC%E3%82%AF%E3%83%B3%E5%8F%8A%E3%81%B3%E3%82%A2%E3%82%BB%E3%83%83%E3%83%88id)のtoken)
 

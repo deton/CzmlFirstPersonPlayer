@@ -134,10 +134,13 @@ imageryViewModels.push(new Cesium.ProviderViewModel({
     });
   }
 }));
+const terrainIdx = urlParams.has('terrainIdx') ? +urlParams.get('terrainIdx') : -1;
+const imageryIdx = +urlParams.get('imageryIdx'); // default 0
 var viewer = new Cesium.Viewer("cesiumContainer", {
   terrainProviderViewModels: terrainViewModels,
   imageryProviderViewModels: imageryViewModels,
-  selectedTerrainProviderViewModel: terrainViewModels.at(-1),
+  selectedTerrainProviderViewModel: terrainViewModels.at(terrainIdx),
+  selectedImageryProviderViewModel: imageryViewModels.at(imageryIdx),
   geocoder: false,
 });
 
