@@ -45,7 +45,7 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
   * (備考): この他、CZMLファイル内で指定したtilesetも読み込まれます。
 * tilesetHeightOffset: tilesetの高さ調整用のオフセット値[m]。
   * (default): 0
-* height: terrainからの視点の高さ[m]。CZML内のmodel.heightReferenceがCLAMPで始まる場合、terrainに対してこの固定値を足した値を視点の高さとして使う。
+* height: terrainからの視点の高さ[m]。CZML内のmodel.heightReferenceがCLAMPで始まる場合、terrainに対してこの固定値を足した値を視点の高さとして使います。
   * (default): 2
   * (備考): (JavaScript ConsoleでHEIGHT_OFFSETを変更することで調整可能)
 * minimap: minimap zoom level. 負の値の場合はminimapを非表示
@@ -57,7 +57,7 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
 * terrainIdx: 地表面地形のindex。後からBaseLayerPicker(画面右上端から2個目のアイコン)で変更可能。
   * `-1`: [PLATEAU配信サービス](https://github.com/Project-PLATEAU/plateau-streaming-tutorial/blob/main/terrain/plateau-terrain-streaming.md)のPLATEAU-Terrain
   * `-2`: 産総研 地質調査総合センターの[標高タイルサービス](https://github.com/aistairc/gsj_numerical_png_terrain_provider)
-  * (ただし、tokenにPLATEAU配信サービス以外のtoken指定時は、PLATEAU-Terrainは使えないので、`-1`が標高タイルサービスになります。)
+  * (ただし、token指定時はPLATEAU-Terrainを追加しないので、`-1`が標高タイルサービスになります。)
   * (default): -1
 * token: Cesium ion access token
   * (default): ([PLATEAU配信サービス](https://github.com/Project-PLATEAU/plateau-streaming-tutorial/blob/main/terrain/plateau-terrain-streaming.md#21-%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9%E3%83%88%E3%83%BC%E3%82%AF%E3%83%B3%E5%8F%8A%E3%81%B3%E3%82%A2%E3%82%BB%E3%83%83%E3%83%88id)のtoken)
@@ -83,12 +83,12 @@ https://deton.github.io/CzmlFirstPersonPlayer/?tileset=google3dtile&czmlurl=http
   * 再生を中止して、Camera操作を有効にするには、JavaScript Consoleで`stopPlayAndEnableCameraControl();`
 
 ## Appendix A: 道路上を移動するCZMLを作成
-* Load the network.geojson and export CZML using [geojson-path-finder](https://github.com/deton/geojson-path-finder)
+* [geojson-path-finder](https://github.com/deton/geojson-path-finder)を使って、道路ネットワークデータのnetwork.geojsonをLoadして、地図上で出発地と目的地を指定して、CZMLをexport。
   * 使用する道路ネットワークデータは、Appendix Bの方法で作成。
     * (または、オープンデータの[歩行空間ネットワークデータ(GeoJSON)](https://www.geospatial.jp/ckan/dataset/0401)が使えるかもしれません。)
   * Example: https://deton.github.io/geojson-path-finder/?networkjson=https://gist.githubusercontent.com/deton/c030eae2af830364580727a291913f8e/raw/28913a796a5ecad82b5990ed10c6d9b5c981c4a1/network-shibuya.geojson&waypointLatLng=35.6590,139.7011&waypointLatLng=35.65956,139.6998&waypointLatLng=35.6601,139.6956
   * 備考: 地表に表示される移動経路の線を、polylineとしてCZMLに入れて生成しています。
-    * 非表示にしたい場合は、CZMLからpolylineを削除するか、`"show": false`を追加してください。
+    * 非表示にしたい場合は、CZMLからpolylineを削除するか、`"show": false`としてください。
     * 移動経路のpolylineは`"clampToGround": true`で表示しているので、橋の下を通る場合など、橋の上に線が表示されます。地表の高さで線を表示するデータを作る場合は、CzmlFirstPersonPlayerのJavaScript Consoleで`console.log(updatePathHeightFromTerrain(czml[2].polyline.positions.cartographicDegrees));`
 
 ## Appendix B: 道路ネットワークデータをOpenStreetMapデータから作成
